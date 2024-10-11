@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Position Size Calculator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgb(43, 95, 54);
+            color: green;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: 50px auto;
+            background-color: black;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #f1fa3c; /* Headline color */
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0 20px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+        }
+        .select2-container--default .select2-selection--single {
+            background-color: #f1fa3c;
+            border: none;
+            color: #000;
+            border-radius: 5px;
+            height: 42px;
+            font-size: 16px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding-left: 10px;
+            line-height: 40px;
+        }
+        .btn {
+            width: 48%;
+            background-color: orange;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 16px;
+            margin-right: 4%;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #ff9800;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #333;
+            border-radius: 5px;
+            color: yellowgreen;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Position Size Calculator</h1>
+        <form id="calculatorForm">
+            <label for="pair">Currency Pair:</label>
+            <select id="pair" required>
+                <!-- Forex Pairs (Alphabetically Ordered) -->
+                <option value="AUDCAD">AUD/CAD</option>
+                <option value="AUDCHF">AUD/CHF</option>
+                <option value="AUDJPY">AUD/JPY</option>
+                <option value="AUDNZD">AUD/NZD</option>
+                <option value="AUDUSD">AUD/USD</option>
+                <option value="CADCHF">CAD/CHF</option>
+                <option value="CADJPY">CAD/JPY</option>
+                <option value="CHFJPY">CHF/JPY</option>
+                <option value="EURAUD">EUR/AUD</option>
+                <option value="EURCAD">EUR/CAD</option>
+                <option value="EURCHF">EUR/CHF</option>
+                <option value="EURGBP">EUR/GBP</option>
+                <option value="EURJPY">EUR/JPY</option>
+                <option value="EURUSD">EUR/USD</option>
+                <option value="GBPAUD">GBP/AUD</option>
+                <option value="GBPCAD">GBP/CAD</option>
+                <option value="GBPCHF">GBP/CHF</option>
+                <option value="GBPJPY">GBP/JPY</option>
+                <option value="GBPUSD">GBP/USD</option>
+                <option value="NZDCAD">NZD/CAD</option>
+                <option value="NZDJPY">NZD/JPY</option>
+                <option value="NZDUSD">NZD/USD</option>
+                <option value="USDCAD">USD/CAD</option>
+                <option value="USDCHF">USD/CHF</option>
+                <option value="USDJPY">USD/JPY</option>
+
+                <!-- Add more currency pairs as needed -->
+            </select>
+
+            <label for="accountCurrency">Account Currency:</label>
+            <select id="accountCurrency" required>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+            </select>
+
+            <label for="accountSize">Account Size:</label>
+            <input type="number" id="accountSize" placeholder="Enter your account size" required>
+
+            <label for="riskRatio">Risk Ratio (%):</label>
+            <input type="number" id="riskRatio" placeholder="Enter risk ratio in percentage" required>
+
+            <label for="stopLoss">Stop-Loss (Pips):</label>
+            <input type="number" id="stopLoss" placeholder="Enter stop-loss in pips" required>
+
+            <button type="button" class="btn" onclick="calculatePositionSize()">Calculate</button>
+            <button type="reset" class="btn">Reset</button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script>
+        // Initialize Select2 for dropdowns
+        $(document).ready(function() {
+            $('#pair').select2({
+                placeholder: 'Select or Search Currency Pair',
+                allowClear: true
+            });
+            $('#accountCurrency').select2({
+                minimumResultsForSearch: Infinity // Disables search in account currency
+            });
+        });
+
+        function calculatePositionSize() {
+            const accountSize = parseFloat(document.getElementById('accountSize').value);
+            const riskRatio = parseFloat(document.getElementById('riskRatio').value) / 100;
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value);
+
+            if (!accountSize || !riskRatio || !stopLoss) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            const riskAmount = accountSize * riskRatio;
+            const pipValue = 10; // Default pip value for most pairs
+            const positionSize = riskAmount / (stopLoss * pipValue);
+
+            document.getElementById('result').innerHTML = `
+                <p><strong>Risk Amount:</strong> ${riskAmount.toFixed(2)} ${document.getElementById('accountCurrency').value}</p>
+                <p><strong>Position Size:</strong> ${positionSize.toFixed(2)} lots</p>
+            `;
+        }
+    </script>
+</body>
+</html>
